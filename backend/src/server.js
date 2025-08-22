@@ -1,35 +1,73 @@
-const express = require('express');
-const cors = require('cors');
-const mongoose = require('mongoose');
-require('dotenv').config();
+import {
+  disconnectDatabase,
+  ensureConnection,
+  getConnectionStatus,
+} from './config/database.js';
+import './config/env.js';
+import { env } from './config/env.js';
+
+import cors from 'cors';
+import express from 'express';
+import helmet from 'helmet';
+import morgan from 'morgan';
 
 const app = express();
-const PORT = process.env.PORT || 5000;
 
-// Middleware
+// Middlewares
+app.use(helmet());
 app.use(cors());
+app.use(morgan(env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// Rutas básicas
-app.get('/', (req, res) => {
-  res.json({ message: 'API de FixCity funcionando correctamente' });
+// Health check
+app.get('/health', (req, res) => {
+  res.json({ status: 'ok' });
 });
 
-// Conexión a MongoDB
-mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/fixcity', {
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
+// 404 - Not found
+app.use((req, res, next) => {
+  res.status(404).json({ error: 'Not Found' });
 });
 
-mongoose.connection.on('connected', () => {
-  console.log('Conectado a MongoDB');
+// Error handler
+app.use((err, req, res, next) => {
+  console.error(err);
+  const status = err.status || 500;
+  const response = {
+    error: err.message || 'Internal Server Error',
+  };
+  if (env.NODE_ENV !== 'production') {
+    response.stack = err.stack;
+  }
+  res.status(status).json(response);
 });
 
-mongoose.connection.on('error', (err) => {
-  console.error('Error conectando a MongoDB:', err);
-});
+async function startServer() {
+  try {
+    console.log('Starting application...');
 
-// Iniciar servidor
-app.listen(PORT, () => {
-  console.log(`Servidor ejecutándose en puerto ${PORT}`);
-});
+    await ensureConnection();
+
+    const server = app.listen(env.PORT || 3000, () => {
+      console.log(`Server running on http://${env.HOST}:${env.PORT}`);
+      console.log(`Database: ${getConnectionStatus().database}`);
+      console.log(`Environment: ${env.NODE_ENV}`);
+    });
+
+    process.on('SIGINT', async () => {
+      cosole.log('\nSutting down...');
+      await disconnectDatabase();
+      server.close(() => {
+        process.exit(0);
+      });
+    });
+  } catch (error) {
+    console.error('Failed to start server: ', error);
+    process.exit(1);
+  }
+}
+
+startServer();
+
+export default app;
