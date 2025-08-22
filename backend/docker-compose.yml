@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:${MONGO_VERSION:-7.0}
+    container_name: ${MONGO_CONTAINER_NAME:-fixcity-mongodb}
+    restart: unless-stopped
+    ports:
+      - "${MONGO_PORT:-27017}:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_ROOT_USERNAME}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ROOT_PASSWORD}
+      - MONGO_INITDB_DATABASE=${MONGO_DATABASE}
+    volumes:
+      - mongodb_data:/data/db
+      - ./mongo-init.js:/docker-entrypoint-initdb.d/mongo-init-js:ro
+      - ./logs/mongodb:/var/log/mongodb
+    networks:
+      - fixcity-net
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    deploy:
+      resourses:
+        limits:
+          memory: 1G
+        reservations:
+          memory: 512M
+
+volumes:
+  mongodb_data:
+    driver: local
+
+networks:
+  fixcity-net:
+    driver: bridge
+    name: fixcity-network

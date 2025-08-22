@@ -1,0 +1,52 @@
+# Version control
+.git
+.gitignore
+
+# Dependencies
+node_modules
+vendor
+
+# Environment files
+.env
+.env.*
+*.env
+
+# Development files
+*.log
+.DS_Store
+.vscode
+.idea
+*.swp
+*.swo
+
+# Build outputs
+dist
+build
+coverage
+*.pyc
+__pycache__
+.pytest_cache
+
+# Docker
+Dockerfile
+docker-compose*.yml
+
+# Documentation
+README.md
+docs
+*.md
+
+# Testing
+test
+tests
+*.test.js
+*.spec.js
+
+# Temporary files
+tmp
+temp
+*.tmp
+
+# Operating System
+.DS_Store
+Thumbs.db
