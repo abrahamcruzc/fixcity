@@ -53,6 +53,12 @@ export const env = {
       maxIdleTimeMS: this.MONGO_MAX_IDLE_TIME,
     };
   },
+
+  // JWT
+  JWT_SECRET: process.env.JWT_SECRET,
+  JWT_EXPIRES_IN: process.env.JWT_EXPIRES_IN,
+  JWT_REFRESH_SECRET: process.env.JWT_REFRESH_SECRET,
+  JWT_REFRESH_EXPIRES_IN: process.env.JWT_REFRESH_EXPIRES_IN,
 };
 
 if (!process.env.MONGO_ROOT_USERNAME || !process.env.MONGO_ROOT_PASSWORD) {
