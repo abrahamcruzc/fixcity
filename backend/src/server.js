@@ -5,6 +5,7 @@ import {
 } from './config/database.js';
 import './config/env.js';
 import { env } from './config/env.js';
+import authRoutes from './routes/auth.js';
 
 import cors from 'cors';
 import express from 'express';
@@ -19,6 +20,8 @@ app.use(cors());
 app.use(morgan(env.NODE_ENV === 'production' ? 'combined' : 'dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
+app.use('/api/auth', authRoutes);
 
 // Health check
 app.get('/health', (req, res) => {
