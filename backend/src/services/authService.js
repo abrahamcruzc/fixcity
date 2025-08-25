@@ -3,11 +3,12 @@ import {
   generateResetToken,
   generateTokens,
   hashToken,
+  verifyRefreshToken,
 } from '../utils/tokenUtils.js';
 
 class AuthService {
   async register(userData) {
-    const { name, email, phone, password, role = 'citizen' } = userData;
+    const { name, email, phone, password } = userData;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -24,7 +25,6 @@ class AuthService {
       email,
       phone,
       password,
-      role,
     });
 
     await user.save();
