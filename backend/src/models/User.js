@@ -1,5 +1,69 @@
+/**
+ * Mongoose schema for a User document.
+ *
+ * @typedef {Object} User
+ *
+ * @property {string} name
+ *   - Required. Trimmed string. Minimum 2 characters, maximum 50 characters.
+ *   - Validation message: 'El nombre es obligatorio' / 'El nombre debe tener al menos 2 caracteres' / 'El nombre no puede exceder 50 caracteres'
+ *
+ * @property {string} email
+ *   - Required, unique, stored lowercase and trimmed. Must match a standard email pattern.
+ *   - Validation message: 'El email es obligatorio' / 'Por favor ingresa un email valido'
+ *
+ * @property {string} phone
+ *   - Required, trimmed. Must match international-style phone regex (optional '+' then digits, 1–16 digits).
+ *   - Validation message: 'El teléfono es obligatorio' / 'Por favor ingresa un numero valido'
+ *
+ * @property {string} password
+ *   - Required. Minimum length 8. Stored but excluded from query results by default (select: false).
+ *   - Validation message: 'La contraseña es obligatoria' / 'La contraseña debe tener al menos 8 caracteres'
+ *
+ * @property {'citizen'|'admin'|'operator'} role
+ *   - Enum with allowed values 'citizen', 'admin', 'operator'. Default: 'citizen'.
+ *   - Validation message: 'El rol debe ser: citizen, admin o operator'
+ *
+ * @property {boolean} isActive
+ *   - Whether the account is active. Default: true.
+ *
+ * @property {boolean} isEmailVerified
+ *   - Whether the email has been verified. Default: true.
+ *
+ * @property {string} [emailVerificationToken]
+ *   - Token used for email verification. Excluded from query results by default (select: false).
+ *
+ * @property {string} [passwordResetToken]
+ *   - Token used for password reset. Excluded from query results by default (select: false).
+ *
+ * @property {Date} [passwordResetExpires]
+ *   - Expiration timestamp for the password reset token. Excluded from query results by default (select: false).
+ *
+ * @property {Date|null} [lastLogin]
+ *   - Timestamp of the user's last successful login. Default: null.
+ *
+ * @property {number} loginAttempts
+ *   - Number of recent failed login attempts. Default: 0.
+ *
+ * @property {Date} [lockUntil]
+ *   - If present, indicates the date/time until which the account is locked. Excluded from query results by default (select: false).
+ *
+ * Schema options:
+ * - timestamps: true — automatically adds createdAt and updatedAt fields.
+ * - toJSON.transform: removes sensitive/internal fields from serialized output:
+ *     * password
+ *     * emailVerificationToken
+ *     * passwordResetExpires
+ *     * lockUntil
+ *     * __v
+ *
+ * Notes:
+ * - Fields marked with select: false will not be returned by default in query results unless explicitly selected.
+ * - Validation messages in the schema are provided in Spanish.
+ */
+
 import bcrypt from 'bcryptjs';
 import mongoose from 'mongoose';
+
 
 const userSchema = new mongoose.Schema(
   {

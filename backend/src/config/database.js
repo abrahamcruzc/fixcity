@@ -1,3 +1,31 @@
+/**
+ * Attempts to establish a MongoDB connection using mongoose and a shared connection state.
+ *
+ * Behavior:
+ * - If connectionState.isConnected is true, logs a message and resolves immediately with true.
+ * - If mongoose.connection.readyState === 1 (already connected), sets connectionState.isConnected and resolves true.
+ * - Otherwise increments connectionState.connectionAttemps, attempts to connect using env.MONGO_URI and env.MONGO_OPTIONS,
+ *   and on success sets connectionState.isConnected, connectionState.connectedAt, clears connectionState.lastError, logs success,
+ *   and resolves true.
+ * - On failure stores the error in connectionState.lastError, logs the failure message, and rethrows the error.
+ *
+ * @async
+ * @function connectDatabase
+ * @returns {Promise<boolean>} Resolves to true when a connection is established or already present.
+ * @throws {Error} Rethrows any error produced by mongoose.connect after recording it in connectionState.lastError.
+ *
+ * @sideEffects
+ * - Reads/writes the shared connectionState object:
+ *   - increments connectionState.connectionAttemps
+ *   - sets connectionState.isConnected and connectionState.connectedAt on success
+ *   - sets connectionState.lastError on failure
+ * - Reads mongoose.connection.readyState and calls mongoose.connect(...)
+ *
+ * @example
+ * // ensure a DB connection before starting the app
+ * await connectDatabase();
+ */
+
 import { env } from './env.js';
 
 import mongoose from 'mongoose';
@@ -8,6 +36,7 @@ const connectionState = {
   connectedAt: null,
   connectionAttempts: 0,
 };
+
 
 export async function connectDatabase() {
   if (connectionState.isConnected) {
