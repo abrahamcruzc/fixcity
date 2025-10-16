@@ -1,4 +1,4 @@
-# 🏙️ FixCity - Plataforma de Gestión de Problemas Urbanos
+# 🏙️ FixCity - Plataforma de Gestión de Problemas Urbanos -
 
 <div align="center">
 
